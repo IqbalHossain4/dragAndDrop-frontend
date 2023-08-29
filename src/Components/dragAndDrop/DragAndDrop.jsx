@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 
 const DragAndDrop = () => {
@@ -7,8 +7,9 @@ const DragAndDrop = () => {
   // start input area
   //value from input
   const fileUploadHandlerInput = (e) => {
+    // e.preventDefault();
     const clickValue = e.target.value;
-    console.log(clickValue);
+    console.log(e.target.value, e.target.files[0]);
     setFileName(clickValue);
   };
 
@@ -59,6 +60,7 @@ const DragAndDrop = () => {
           <input
             type="file"
             accept=".ttf"
+            name="valuesd"
             onChange={fileUploadHandlerInput}
             className="input-field hidden"
           />
