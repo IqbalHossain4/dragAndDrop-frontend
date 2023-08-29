@@ -22,7 +22,8 @@ form {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px dashed #1475cf;
+  gap: 10px;
+  border: 2px dashed gray;
   cursor: pointer;
   border-radius: 5px;
 }
