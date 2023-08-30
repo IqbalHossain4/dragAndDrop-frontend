@@ -1,27 +1,19 @@
 import React, { useState } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
-
+import axios from "axios";
 const DragAndDrop = () => {
-  const [fileName, setFileName] = useState(null);
+  const [fontUrl, setFontUrl] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-  // start input area
-  //value from input
-  const fileUploadHandlerInput = (e) => {
-    // e.preventDefault();
-    const clickValue = e.target.value;
-    console.log(e.target.value, e.target.files[0]);
-    setFileName(clickValue);
-  };
-
-  // value from drag and drop
-  const fileUploadHandlerDrag = (file) => {
-    console.log(file, file.name);
-    setFileName(file.name);
-  };
+  const fontName = fontUrl ? fontUrl.name.split(".")[0] : null;
 
   // start drag and drop area
   const dragOverHandler = (e) => {
     e.preventDefault();
+  };
+
+  // value from drag and drop
+  const fileUploadHandlerDrag = (file) => {
+    setFontUrl(file ? file : null);
   };
 
   const dropHandler = (e) => {
@@ -31,19 +23,41 @@ const DragAndDrop = () => {
 
     if ((file && file.type === "font/ttf") || fileWithName === "ttf") {
       setErrorMsg("");
-      fileUploadHandlerDrag(file);
+      fileUploadHandlerDrag(file ? file : null);
     } else {
-      setFileName("");
+      setFontUrl("");
       setErrorMsg("Invalid file type. Only TTF files are allowed.");
     }
   };
 
+  const uploadTtfFile = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("fontUrl", fontUrl);
+    formData.append("fontName", fontName);
+    const responce = await axios.post(
+      "http://localhost/projects/dragDrop/upload.php",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    if (responce.data.success) {
+      setErrorMsg(responce.data.success);
+    }
+  };
+
+  // if (fontUrl) {
+  //   uploadTtfFile();
+  // }
   return (
     <div className="containers">
       <form
         onClick={() => document.querySelector(".input-field").click()}
         onDragOver={dragOverHandler}
         onDrop={dropHandler}
+        onSubmit={uploadTtfFile}
+        className="dragDropBox"
       >
         <div className="w-full text-center text-gray-500">
           <p>
@@ -60,19 +74,18 @@ const DragAndDrop = () => {
           <input
             type="file"
             accept=".ttf"
-            name="valuesd"
-            onChange={fileUploadHandlerInput}
+            onChange={(e) => setFontUrl(e.target.files[0])}
             className="input-field hidden"
           />
         </div>
         <div>
-          {fileName && (
+          {fontUrl && (
             <h4 className="text-[12px]">
-              <span className="font-[600]">File Name:</span> {fileName}
+              <span className="font-[600]">File Name:</span> {fontUrl.name}
             </h4>
           )}
         </div>
-        <p className="text-red-500 text-[12px]">{errorMsg}</p>
+        {errorMsg && <p className="text-red-500 text-[12px]">{errorMsg}</p>}
       </form>
     </div>
   );
