@@ -16,6 +16,7 @@ body {
   justify-content: center;
 }
 
+/* Drag and Drop Form */
 .dragDropBox {
   width: 500px;
   height: 300px;
@@ -27,4 +28,47 @@ body {
   border: 2px dashed gray;
   cursor: pointer;
   border-radius: 5px;
+}
+
+/* Table */
+
+#table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  color: white;
+}
+
+#table td,
+#table th {
+  border: 1px solid #2c3845;
+  padding: 8px;
+}
+
+#table tr:nth-child(even) {
+  background-color: #2c3845;
+}
+#table tr:nth-child(odd) {
+  background-color: #202932;
+}
+
+#table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  color: white;
+  font-weight: 800;
+}
+@font-face {
+  font-family: "RobotoCondensed";
+  src: url("./assets/RobotoCondensed-Bold.ttf");
+}
+
+.fonstPreview {
+  font-family: "RobotoCondensed", sans-serif;
+  font-size: 20px;
+}
+
+.font-family-FontName {
+  font-family: "FontName", sans-serif;
 }
