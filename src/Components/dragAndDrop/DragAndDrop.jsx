@@ -38,15 +38,15 @@ const DragAndDrop = () => {
     const formData = new FormData();
     formData.append("fontUrl", fontUrl);
     formData.append("fontName", fontName);
-    const responce = await axios.post(
+    const res = await axios.post(
       "http://localhost/projects/dragDrop/upload.php",
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
-    if (responce) {
-      setErrorMsg(responce.data.success);
+    if (res) {
+      setErrorMsg(res.data.success);
       Swal.fire({
         position: "center",
         icon: "success",
@@ -62,7 +62,7 @@ const DragAndDrop = () => {
   }
 
   return (
-    <div>
+    <div className="wrapper">
       <div className="containers">
         <form
           onClick={() => document.querySelector(".input-field").click()}
