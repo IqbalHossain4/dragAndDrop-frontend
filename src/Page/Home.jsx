@@ -28,7 +28,6 @@ const Home = () => {
 
   return (
     <div>
-      {/* Header */}
       <Header />
 
       {/* DragAndDropt */}
