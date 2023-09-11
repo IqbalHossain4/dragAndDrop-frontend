@@ -70,6 +70,7 @@ const DragAndDrop = () => {
           showConfirmButton: false,
           timer: 1500,
         });
+        setFontUrl(null);
       }
     }
   };
