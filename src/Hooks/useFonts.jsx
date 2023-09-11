@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 const useFonts = () => {
-  const [loadFonts, setLoadFonts] = useState([]);
+  const [loadTotalFonts, setLoadFonts] = useState([]);
+  // ==== Get data in uploadFonts Table ====
 
   useEffect(() => {
     getFont();
@@ -10,11 +11,11 @@ const useFonts = () => {
 
   const getFont = async () => {
     const res = await axios
-      .get("http://localhost/projects/dragDrop/upload.php")
+      .get("http://localhost/projects/dragDrop/uploadFonts.php")
       .then((res) => setLoadFonts(res.data));
   };
 
-  return [loadFonts, getFont];
+  return [loadTotalFonts, getFont];
 };
 
 export default useFonts;
