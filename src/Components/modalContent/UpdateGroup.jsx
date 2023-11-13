@@ -12,70 +12,80 @@ const UpdateGroup = ({ groupData }) => {
   const [groupDatas, setGroupDatas] = useState([]);
   const [addNew, setAddNew] = useState(false);
   const [loadedFonts, setLoadedFonts] = useState([]);
+  const [allGroup, setAllGroup] = useState(null);
+  const [selectedFont, setSelectedFont] = useState([]);
 
-  // ==== Get Data with GroupName in GroupData Table ====
+  // ==== Get Data with GroupName ====
   useEffect(() => {
     getGroupData();
   }, [loadSelectedFonts]);
 
   const getGroupData = async () => {
     const res = await axios
-      .get(
-        `http://localhost/projects/dragDrop/groupData.php?groupName=${groupData}`
-      )
+      .get(`http://localhost:5000/getSpecificGrp?group=${groupData}`)
       .then((res) => setGroupDatas(res.data));
   };
 
-  //==== process Group Data ====
-  let storeGroupData = [];
-  for (const x in groupDatas) {
-    const moreData = groupDatas[x];
-    for (const y in moreData) {
-      const singleData = moreData[y];
-      for (const i in singleData) {
-        storeGroupData.push(singleData[i]);
-      }
+  useEffect(() => {
+    const allGroup = async () => {
+      const res = await axios.get("http://localhost:5000/getGroup");
+      setAllGroup(res.data);
+    };
+    allGroup();
+  }, []);
+
+  // ==== Filter Data in SelectedFonts ====
+  useEffect(() => {
+    if (loadSelectedFonts) {
+      setSelectedFont(
+        loadSelectedFonts.filter((font) => font.fontId !== loadTotalFonts.id)
+      );
+    }
+  }, [loadSelectedFonts]);
+
+  // Process Data
+  let groupFontId = [];
+  for (const groups of groupDatas) {
+    let group = groups.fontId;
+    for (const groupFont of group) {
+      groupFontId.push(groupFont);
     }
   }
 
-  // ==== Filter Data Whice are contain fontName ====
-  const remainingFont = storeGroupData.filter((fontData) => fontData.fontName);
-
   // ==== Find Out Remaining Fonts ====
   const remainingFonts = loadTotalFonts.filter((font) => {
-    return !loadSelectedFonts.some((fontData) => fontData.fontId === font.id);
+    return !groupFontId.includes(font._id);
+  });
+
+  // ==== Find Out Existing Fonts ====
+  const existingFont = loadTotalFonts.filter((font) => {
+    return groupFontId.includes(font._id);
   });
 
   // ==== Handle Add New Font whice are remaining ====
   const handleAddNew = async (id) => {
-    const selectedFontData = loadTotalFonts.find((font) => font.id === id);
-    const fontData = [
-      {
-        fontUrl: selectedFontData.fontUrl,
-        fontName: selectedFontData.fontName,
-        status: "Selected",
-        fontId: selectedFontData.id,
-        groupName: groupData,
-      },
-    ];
-
-    const res = await axios.post(
-      "http://localhost/projects/dragDrop/selectedFonts.php",
-      fontData
-    );
-    if (res.status === 200) {
-      selectFont();
-      Swal.fire({
-        position: "center",
-        icon: "success",
-        title: "Successfully Post Your Font",
-        showConfirmButton: false,
-        timer: 1500,
-      });
+    if (!id) {
+      return;
+    } else {
+      const res = await axios.post(
+        `http://localhost:5000/updateGroupFont?group=${groupData}`,
+        id
+      );
+      if (res.status === 200) {
+        selectFont();
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Successfully Post Your Font",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        getFont();
+      }
     }
   };
 
-  //==== Handle Remove with specific id in selectedFonts Table====
+  //Handle Remove with specific id in selectedFonts
   const handleRemove = (id) => {
     Swal.fire({
       title: "Are you sure?",
@@ -88,7 +98,7 @@ const UpdateGroup = ({ groupData }) => {
     }).then((result) => {
       if (result.isConfirmed) {
         const res = axios.delete(
-          "http://localhost/projects/dragDrop/selectedFonts.php/" + id
+          `http://localhost:5000/deleteGroupFont?id=${id}`
         );
         if (res.status === 200) {
           getFont();
@@ -152,7 +162,7 @@ const UpdateGroup = ({ groupData }) => {
           <div className="relative w-[45px]  mt-4 mr-8 mb-8">
             <FaShoppingCart className="text-2xl text-[#2c3845]" />
             <div className="bg-pink-400 text-white text-sm text-center rounded-[100%] w-6 h-6 absolute -top-2 -right-1 flex items-center justify-center">
-              <span>{remainingFont.length}</span>
+              <span>{existingFont.length}</span>
             </div>
           </div>
         </div>
@@ -180,7 +190,7 @@ const UpdateGroup = ({ groupData }) => {
           </tr>
         </thead>
         <tbody>
-          {remainingFont.map((fontData, index) => (
+          {existingFont.map((fontData, index) => (
             <tr key={index}>
               <td>{index + 1}</td>
               <td className="w-1/3 md:text-[14px] text-[10px]">
@@ -200,7 +210,7 @@ const UpdateGroup = ({ groupData }) => {
               </td>
               <td className="w-1/3">
                 <button
-                  onClick={() => handleRemove(fontData.fontId)}
+                  onClick={() => handleRemove(fontData._id)}
                   className="bg-red-500 md:text-[14px] text-[8px] py-1 md:px-3 px-1  rounded-md cursor-pointer duration-200 hover:bg-red-400"
                 >
                   Remove
@@ -228,28 +238,39 @@ const UpdateGroup = ({ groupData }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {remainingFonts.map((fontData, index) => (
+                  {remainingFonts.map((font, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
-                      <td className="w-1/3">{fontData.fontName}</td>
+                      <td className="w-1/3">{font.fontName}</td>
                       <td className="w-1/3">
                         <div
                           className="font-preview"
-                          data-font-name={fontData.fontName?.split("-")[0]}
+                          data-font-name={font.fontName?.split("-")[0]}
                           style={{
                             width: "60px",
                             height: "50px",
                           }}
                         >
-                          {fontData.fontName?.split("-")[0]}
+                          {font.fontName?.split("-")[0]}
                         </div>
                       </td>
                       <td className="w-1/3">
                         <button
-                          onClick={() => handleAddNew(fontData.id)}
-                          className="md:w-[120px] w-[40px]  py-2 text-center text-black rounded-md md:text-[18px] text-[8px] font-[600] bg-white"
+                          onClick={() => handleAddNew(font._id)}
+                          className={`md:w-[120px] w-[40px]  py-1 text-center text-black rounded-md md:text-[18px] text-[8px] font-[600] ${
+                            allGroup.some((fontData) =>
+                              fontData.fontId.includes(font._id)
+                            )
+                              ? "bg-green-400 cursor-not-allowed"
+                              : "bg-white cursor-pointer"
+                          }`}
                         >
-                          Select
+                          {loadSelectedFonts &&
+                          selectedFont.some((fontData) =>
+                            fontData.fontId.includes(font._id)
+                          )
+                            ? "Selected"
+                            : "Select"}
                         </button>
                       </td>
                     </tr>

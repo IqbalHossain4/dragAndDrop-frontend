@@ -12,8 +12,10 @@ const CreateGroup = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [inputMsg, setInputMsg] = useState("");
   const [groupName, setGroupName] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState();
+  const [selectedGroupId, setSelectedGroupId] = useState([]);
   const [loadedFonts, setLoadedFonts] = useState([]);
+  const [groupDatas, setGroupDatas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPageFonts, setPerPageFonts] = useState([]);
   const itemPerPage = 6;
@@ -21,51 +23,7 @@ const CreateGroup = () => {
   const pageNumbers = [...Array(totalPages).keys()].map((num) => num + 1);
   const startSerialNumber = (currentPage - 1) * itemPerPage + 1;
 
-  // ==== Filter Data in SelectedFonts Hook and loadTotalFonts Hook ====
-  useEffect(() => {
-    if (loadSelectedFonts) {
-      setSelectedFont(
-        loadSelectedFonts.filter((font) => font.fontId !== loadTotalFonts.id)
-      );
-    }
-  }, [loadSelectedFonts]);
-
-  // ==== Store Data Whice are Selected ====
-  const uploadSelectedFont = async (fontId) => {
-    const selectedFontData = loadTotalFonts.find((font) => font.id === fontId);
-
-    if (!selectedFontData) {
-      setErrorMsg("Font data not found");
-      return;
-    }
-
-    const isFontSelected = selectedGroup.some(
-      (font) => font.fontId === selectedFontData.id
-    );
-
-    if (isFontSelected) {
-      setErrorMsg("Font is already selected");
-    } else {
-      if (groupName === "") {
-        setErrorMsg("First Define The Group Name");
-        return;
-      } else {
-        setErrorMsg("");
-        setInputMsg("");
-        let fonts = {
-          fontUrl: selectedFontData.fontUrl,
-          fontName: selectedFontData.fontName,
-          status: "Selected",
-          fontId: selectedFontData.id,
-          groupName: groupName,
-        };
-        setSelectedGroup((prevData) => [...prevData, fonts]);
-      }
-    }
-  };
-
   // ====Manag Pagination====
-
   useEffect(() => {
     handlePagination();
   }, [perPageFonts]);
@@ -73,7 +31,7 @@ const CreateGroup = () => {
   const handlePagination = async () => {
     try {
       const res = await axios.get(
-        `http://localhost/projects/dragDrop/paginationFonts.php?pageNo=${currentPage}`
+        `http://localhost:5000/getFont?page=${currentPage}`
       );
       setPerPageFonts(res.data);
     } catch (error) {
@@ -93,6 +51,57 @@ const CreateGroup = () => {
     }
   };
 
+  //==== Get Data in groupData  ====
+  useEffect(() => {
+    getGroupData();
+  }, [loadSelectedFonts]);
+  const getGroupData = async () => {
+    const res = await axios.get("http://localhost:5000/getGroup");
+    setGroupDatas(res.data);
+  };
+
+  // ==== Filter Data in SelectedFonts ====
+  useEffect(() => {
+    if (loadSelectedFonts) {
+      setSelectedFont(
+        loadSelectedFonts.filter((font) => font.fontId !== loadTotalFonts.id)
+      );
+    }
+  }, [loadSelectedFonts]);
+
+  // ==== Store Data Whice are Selected ====
+  const uploadSelectedFont = async (fontId) => {
+    const selectedFontData = loadTotalFonts.find((font) => font._id === fontId);
+
+    if (!selectedFontData) {
+      setErrorMsg("Font data not found");
+      return;
+    }
+    let isFontSelected = selectedGroupId.some(
+      (id) => id == selectedFontData._id
+    );
+
+    if (isFontSelected) {
+      setErrorMsg("Font is already selected");
+      return;
+    } else {
+      if (groupName === "") {
+        setErrorMsg("First Define The Group Name");
+        return;
+      } else {
+        setErrorMsg("");
+        setInputMsg("");
+        setSelectedGroupId((prevData) => [...prevData, selectedFontData._id]);
+        const fonts = {
+          groupName: groupName,
+          status: "Selected",
+          fontId: selectedGroupId,
+        };
+        setSelectedGroup(fonts);
+      }
+    }
+  };
+
   // ==== Post Font ====
   const createGroup = async () => {
     if (groupName === "") {
@@ -107,7 +116,7 @@ const CreateGroup = () => {
       setInputMsg("");
       const fontData = selectedGroup;
       const res = await axios.post(
-        "http://localhost/projects/dragDrop/selectedFonts.php",
+        "http://localhost:5000/createFontGroup",
         fontData
       );
       if (res.status === 200) {
@@ -119,6 +128,7 @@ const CreateGroup = () => {
           showConfirmButton: false,
           timer: 1500,
         });
+        getFont();
       }
     }
   };
@@ -170,7 +180,7 @@ const CreateGroup = () => {
           <div className="relative w-[45px]  mt-4 mr-8 mb-8">
             <FaShoppingCart className="text-2xl text-[#2c3845]" />
             <div className="bg-pink-400 text-white text-sm text-center rounded-[100%] w-6 h-6 absolute -top-2 -right-1 flex items-center justify-center">
-              <span>{selectedFont ? selectedFont.length : 0}</span>
+              <span>{selectedGroup ? selectedGroup.fontId.length + 1 : 0}</span>
             </div>
           </div>
         </div>
@@ -211,18 +221,22 @@ const CreateGroup = () => {
                   {font.fontName?.split("-")[0]}
                 </div>
               </td>
-              <td>{font.upload_at.split(" ")[0]}</td>
+              <td>{font?.date}</td>
               <td className="text-center">
                 <button
-                  onClick={() => uploadSelectedFont(font.id)}
+                  onClick={() => uploadSelectedFont(font._id)}
                   className={`md:w-[120px] w-[40px]  py-1 text-center text-black rounded-md md:text-[18px] text-[8px] font-[600] ${
-                    selectedFont.some((fontData) => fontData.fontId === font.id)
+                    groupDatas.some((fontData) =>
+                      fontData.fontId.includes(font._id)
+                    )
                       ? "bg-green-400 cursor-not-allowed"
                       : "bg-white cursor-pointer"
                   }`}
                 >
                   {loadSelectedFonts &&
-                  selectedFont.some((fontData) => fontData.fontId === font.id)
+                  selectedFont.some((fontData) =>
+                    fontData.fontId.includes(font._id)
+                  )
                     ? "Selected"
                     : "Select"}
                 </button>

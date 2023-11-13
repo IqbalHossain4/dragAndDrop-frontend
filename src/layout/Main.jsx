@@ -19,7 +19,6 @@ const Main = () => {
           <PreLoader />
         ) : (
           <div>
-            {" "}
             <Home />
           </div>
         )}

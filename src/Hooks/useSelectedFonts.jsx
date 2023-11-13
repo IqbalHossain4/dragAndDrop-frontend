@@ -11,7 +11,7 @@ const useSelectedFonts = () => {
 
   const selectFont = async () => {
     const res = await axios
-      .get("http://localhost/projects/dragDrop/selectedFonts.php")
+      .get("http://localhost:5000/getGroup")
       .then((res) => setloadSelectedFonts(res.data));
   };
 

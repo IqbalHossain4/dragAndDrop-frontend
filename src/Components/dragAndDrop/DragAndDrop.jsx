@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { AuthContext } from "../../Context/AuthProvider";
+import useFonts from "../../Hooks/useFonts";
 
 const DragAndDrop = () => {
-  const [fontUrl, setFontUrl] = useState(null);
+  const { user } = useContext(AuthContext);
+  const [loadTotalFonts, getFont] = useFonts();
+  const [fontUrl, setFontUrl] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const fontName = fontUrl ? fontUrl.name.split(".")[0] : null;
   const [dragOver, setDragOver] = useState(false);
+
   //==== start drag and drop area ====
   const dragOverHandler = (e) => {
     e.preventDefault();
@@ -42,44 +47,47 @@ const DragAndDrop = () => {
   };
 
   // ==== post Fonts File ====
+  const email = user?.email;
   const uploadFont = async () => {
     const formData = new FormData();
-    formData.append("fontUrl", fontUrl);
+    formData.append("email", email);
+    formData.append("font", fontUrl);
     formData.append("fontName", fontName);
-    const res = await axios.post(
-      "http://localhost/projects/dragDrop/uploadFonts.php",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percentCompleted);
-        },
-      }
-    );
-    if (uploadProgress === 100) {
-      if (res.status === 200) {
+    const res = await axios.post("http://localhost:5000/postFont", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        setUploadProgress(percentCompleted);
+      },
+    });
+
+    if (uploadProgress == 100) {
+      if (res.data.insertedId) {
         Swal.fire({
           position: "center",
           icon: "success",
-          title: "Successfully Post Your Font",
+          title: "Your work has been saved",
           showConfirmButton: false,
           timer: 1500,
         });
-        setFontUrl(null);
+        getFont();
       }
     }
   };
 
-  //==== call Post Function ====
+  // ==== call Post Function ====
   if (fontUrl) {
-    uploadFont();
+    if (!fontUrl) {
+      return;
+    } else {
+      uploadFont();
+      setFontUrl("");
+    }
   }
-
   return (
     <div className="pb-24 mb-8 pt-16 bg-black">
       <div className="wrapper">
@@ -104,7 +112,7 @@ const DragAndDrop = () => {
             </div>
           </div>
         </div>
-        <div className="containers">
+        <div className="w-full flex items-center justify-center">
           <form
             onClick={() => document.querySelector(".input-field").click()}
             onDragOver={dragOverHandler}
@@ -128,6 +136,7 @@ const DragAndDrop = () => {
               <input
                 type="file"
                 accept=".ttf"
+                name="font"
                 onChange={(e) => setFontUrl(e.target.files[0])}
                 className="input-field hidden"
               />

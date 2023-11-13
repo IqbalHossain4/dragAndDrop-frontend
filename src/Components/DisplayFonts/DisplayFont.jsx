@@ -3,10 +3,9 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import useFonts from "../../Hooks/useFonts";
 import { AiFillDelete } from "react-icons/ai";
-
+import WebFont from "webfontloader";
 const DisplayFont = () => {
   const [loadTotalFonts, getFont] = useFonts();
-  const [loadedFonts, setLoadedFonts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPageFonts, setPerPageFonts] = useState([]);
   const itemPerPage = 6;
@@ -27,7 +26,7 @@ const DisplayFont = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const res = await axios.delete(
-          "http://localhost/projects/dragDrop/uploadFonts.php/" + id
+          `http://localhost:5000/deleteFont/${id}`
         );
         if (res.status === 200) {
           getFont();
@@ -45,7 +44,7 @@ const DisplayFont = () => {
 
   const handlePagination = async () => {
     const res = await axios.get(
-      `http://localhost/projects/dragDrop/paginationFonts.php?pageNo=${currentPage}`
+      `http://localhost:5000/getFont?page=${currentPage}`
     );
     setPerPageFonts(res.data);
   };
@@ -64,42 +63,24 @@ const DisplayFont = () => {
 
   // ==== Font Preview ====
   useEffect(() => {
-    loadAndApplyFonts();
-  }, [loadTotalFonts]);
+    const uniqueFontNames = [
+      ...new Set(perPageFonts.map((font) => font.fontName)),
+    ];
 
-  // ...
-  const loadAndApplyFonts = () => {
-    const fontsToLoad = [];
-    loadTotalFonts.forEach((font, index) => {
-      const fontName = `"${font.fontName}"`;
-      const fontUrl = font.fontUrl;
-
-      if (!loadedFonts.includes(fontName)) {
-        fontsToLoad.push({ fontName, fontUrl });
-        setLoadedFonts((prevFonts) => [...prevFonts, fontName]);
-      }
+    WebFont.load({
+      custom: {
+        families: uniqueFontNames.map((fontName) => fontName),
+        urls: perPageFonts.map((fonts) => fonts.font),
+      },
+      active: () => {
+        const previewElements = document.querySelectorAll(".font-preview");
+        previewElements.forEach((element) => {
+          const fontName = element.getAttribute("data-font-name");
+          element.style.fontFamily = fontName;
+        });
+      },
     });
-
-    const style = document.createElement("style");
-    let fontFaceCSS = "";
-
-    fontsToLoad.forEach((font, index) => {
-      fontFaceCSS += `
-      @font-face {
-        font-family: ${font.fontName?.split("-")[0]};
-        src: url(${font.fontUrl}) format('truetype');
-      }
-    `;
-    });
-
-    style.appendChild(document.createTextNode(fontFaceCSS));
-    document.head.appendChild(style);
-    const previewElements = document.querySelectorAll(".font-preview");
-    previewElements.forEach((element) => {
-      const fontName = element.getAttribute("data-font-name");
-      element.style.fontFamily = fontName;
-    });
-  };
+  }, []);
 
   return (
     <div>
@@ -129,7 +110,7 @@ const DisplayFont = () => {
                     <td>
                       <div
                         className="font-preview"
-                        data-font-name={font.fontName?.split("-")[0]}
+                        data-font-name={font.fontName}
                         style={{
                           width: "60px",
                           height: "50px",
@@ -138,10 +119,10 @@ const DisplayFont = () => {
                         {font.fontName?.split("-")[0]}
                       </div>
                     </td>
-                    <td>{font.upload_at?.split(" ")[0]}</td>
+                    <td>{font?.date}</td>
                     <td>
                       <button
-                        onClick={() => handleDelete(font.id)}
+                        onClick={() => handleDelete(font._id)}
                         className="bg-red-500 py-1 px-4 rounded-md cursor-pointer duration-200 text-black hover:text-white"
                       >
                         <AiFillDelete className="text-[18px] " />

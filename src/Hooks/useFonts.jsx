@@ -1,19 +1,14 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const useFonts = () => {
-  const [loadTotalFonts, setLoadFonts] = useState([]);
-  // ==== Get data in uploadFonts Table ====
-
-  useEffect(() => {
-    getFont();
-  }, []);
-
-  const getFont = async () => {
-    const res = await axios
-      .get("http://localhost/projects/dragDrop/uploadFonts.php")
-      .then((res) => setLoadFonts(res.data));
-  };
+  const { getFont, data: loadTotalFonts = [] } = useQuery({
+    ueryKey: ["totalFonts"],
+    queryFn: async () => {
+      const res = await axios.get("http://localhost:5000/getFonts");
+      return res.data;
+    },
+  });
 
   return [loadTotalFonts, getFont];
 };

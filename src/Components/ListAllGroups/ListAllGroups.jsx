@@ -5,8 +5,11 @@ import { AiFillDelete, AiOutlineEdit } from "react-icons/ai";
 import Modal from "../Modal/Modal";
 import UpdateGroup from "../modalContent/UpdateGroup";
 import Swal from "sweetalert2";
+import useFonts from "../../Hooks/useFonts";
+import useAxiosSecure from "../../Hooks/useAxiosSecure";
 
 const ListAllGroups = () => {
+  const [loadTotalFonts, getFont] = useFonts();
   const [loadSelectedFonts, selectFont] = useSelectedFonts();
   const [groupDatas, setGroupDatas] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -17,13 +20,12 @@ const ListAllGroups = () => {
     getGroupData();
   }, [loadSelectedFonts]);
   const getGroupData = async () => {
-    const res = await axios
-      .get("http://localhost/projects/dragDrop/groupData.php")
-      .then((res) => setGroupDatas(res.data));
+    const res = await axios.get("http://localhost:5000/getGroup");
+    setGroupDatas(res.data);
   };
 
   // ==== Handle Delete Group ====
-  const handleDelete = (group) => {
+  const handleDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -34,16 +36,14 @@ const ListAllGroups = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios
-          .delete("http://localhost/projects/dragDrop/groupData.php/" + group)
-          .then((res) => {
-            if (res.status === 200) {
-              Swal.fire("Deleted!", "List are Deleted deleted.", "success");
-              selectFont();
-            } else {
-              Swal.fire("Error", "Failed to delete data.", "error");
-            }
-          });
+        axios.delete(`http://localhost:5000/deleteGroup/${id}`).then((res) => {
+          if (res.status === 200) {
+            Swal.fire("Deleted!", "List are Deleted deleted.", "success");
+            selectFont();
+          } else {
+            Swal.fire("Error", "Failed to delete data.", "error");
+          }
+        });
       }
     });
   };
@@ -89,10 +89,10 @@ const ListAllGroups = () => {
                 <td>{index + 1}</td>
                 <td className="w-1/3">{fontData?.groupName}</td>
                 <td className="flex flex-wrap items-center">
-                  {loadSelectedFonts.map((font, fontIndex) => (
-                    <p key={fontIndex} onClick={() => handleGroupData(font)}>
-                      {fontData.groupName === font.groupName &&
-                        font.fontName?.split("-")[0]}
+                  {loadTotalFonts.map((font, fontIndex) => (
+                    <p key={fontIndex}>
+                      {fontData.fontId.includes(font._id) &&
+                        font.fontName?.split("-")[0] + ","}
                     </p>
                   ))}
                 </td>
@@ -107,7 +107,7 @@ const ListAllGroups = () => {
                       </button>
                     </div>
                     <button
-                      onClick={() => handleDelete(fontData.groupName)}
+                      onClick={() => handleDelete(fontData._id)}
                       className="bg-red-500 py-1 px-4 rounded-md cursor-pointer duration-200 text-black hover:text-white"
                     >
                       <AiFillDelete className="text-[18px] " />

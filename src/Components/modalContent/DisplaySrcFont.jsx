@@ -13,9 +13,21 @@ const DisplaySrcFont = ({ srcData }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [inputMsg, setInputMsg] = useState("");
   const [groupName, setGroupName] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState();
+  const [selectedGroupId, setSelectedGroupId] = useState([]);
+  const [loadedFonts, setLoadedFonts] = useState([]);
+  const [groupDatas, setGroupDatas] = useState([]);
 
-  // ==== Filter Data in SelectedFonts Hook and loadTotalFonts Hook ====
+  //==== Get Data in groupData  ====
+  useEffect(() => {
+    getGroupData();
+  }, [loadSelectedFonts]);
+  const getGroupData = async () => {
+    const res = await axios.get("http://localhost:5000/getGroup");
+    setGroupDatas(res.data);
+  };
+
+  // ==== Filter Data in SelectedFonts ====
   useEffect(() => {
     if (loadSelectedFonts) {
       setSelectedFont(
@@ -26,19 +38,19 @@ const DisplaySrcFont = ({ srcData }) => {
 
   // ==== Store Data Whice are Selected ====
   const uploadSelectedFont = async (fontId) => {
-    const selectedFontData = loadTotalFonts.find((font) => font.id === fontId);
+    const selectedFontData = loadTotalFonts.find((font) => font._id === fontId);
 
     if (!selectedFontData) {
       setErrorMsg("Font data not found");
       return;
     }
-
-    const isFontSelected = selectedGroup.some(
-      (font) => font.fontId === selectedFontData.id
+    let isFontSelected = selectedGroupId.some(
+      (id) => id == selectedFontData._id
     );
 
     if (isFontSelected) {
       setErrorMsg("Font is already selected");
+      return;
     } else {
       if (groupName === "") {
         setErrorMsg("First Define The Group Name");
@@ -46,14 +58,13 @@ const DisplaySrcFont = ({ srcData }) => {
       } else {
         setErrorMsg("");
         setInputMsg("");
-        let fonts = {
-          fontUrl: selectedFontData.fontUrl,
-          fontName: selectedFontData.fontName,
-          status: "Selected",
-          fontId: selectedFontData.id,
+        setSelectedGroupId((prevData) => [...prevData, selectedFontData._id]);
+        const fonts = {
           groupName: groupName,
+          status: "Selected",
+          fontId: selectedGroupId,
         };
-        setSelectedGroup((prevData) => [...prevData, fonts]);
+        setSelectedGroup(fonts);
       }
     }
   };
@@ -72,7 +83,7 @@ const DisplaySrcFont = ({ srcData }) => {
       setInputMsg("");
       const fontData = selectedGroup;
       const res = await axios.post(
-        "http://localhost/projects/dragDrop/selectedFonts.php",
+        "http://localhost:5000/createFontGroup",
         fontData
       );
       if (res.status === 200) {
@@ -84,27 +95,59 @@ const DisplaySrcFont = ({ srcData }) => {
           showConfirmButton: false,
           timer: 1500,
         });
+        getFont();
       }
     }
   };
+
+  // ==== Font Preview ====
+  useEffect(() => {
+    loadAndApplyFonts();
+  }, [loadTotalFonts]);
+
+  // ...
+  const loadAndApplyFonts = () => {
+    const fontsToLoad = [];
+    loadTotalFonts.forEach((font, index) => {
+      const fontName = `"${font.fontName}"`;
+      const fontUrl = font.fontUrl;
+
+      if (!loadedFonts.includes(fontName)) {
+        fontsToLoad.push({ fontName, fontUrl });
+        setLoadedFonts((prevFonts) => [...prevFonts, fontName]);
+      }
+    });
+
+    const style = document.createElement("style");
+    let fontFaceCSS = "";
+
+    fontsToLoad.forEach((font, index) => {
+      fontFaceCSS += `
+        @font-face {
+          font-family: ${font.fontName?.split("-")[0]};
+          src: url(${font.fontUrl}) format('truetype');
+        }
+      `;
+    });
+
+    style.appendChild(document.createTextNode(fontFaceCSS));
+    document.head.appendChild(style);
+    const previewElements = document.querySelectorAll(".font-preview");
+    previewElements.forEach((element) => {
+      const fontName = element.getAttribute("data-font-name");
+      element.style.fontFamily = fontName;
+    });
+  };
+
   return (
-    <div>
+    <div className="modal_container">
       <div className="mt-12 mb-6">
         <div className="flex items-center justify-between">
           <h3 className="font-[600] text-[18px] mb-4">Group Name:</h3>
           <div className="relative w-[45px]  mt-4 mr-8 mb-8">
             <FaShoppingCart className="text-2xl text-[#2c3845]" />
             <div className="bg-pink-400 text-white text-sm text-center rounded-[100%] w-6 h-6 absolute -top-2 -right-1 flex items-center justify-center">
-              <span>
-                {selectedFont
-                  ? selectedFont.length
-                    ? srcFonts.length !== loadSelectedFonts.length
-                      ? selectedGroup.length + selectedFont.length
-                      : srcFonts.length == loadSelectedFonts.length &&
-                        srcFonts.length
-                    : 0
-                  : 0}
-              </span>
+              <span>{selectedGroup ? selectedGroup.fontId.length + 1 : 0}</span>
             </div>
           </div>
         </div>
@@ -132,20 +175,35 @@ const DisplaySrcFont = ({ srcData }) => {
           {srcFonts.map((font, index) => (
             <tr key={index} className="text-[14px]">
               <td>{index + 1}</td>
-              <td>{font.fontName}</td>
-              <td>{font.fontName?.split("-")[0]}</td>
-              <td>{font.upload_at.split(" ")[0]}</td>
+              <td className="md:text-[14px] text-[10px]">{font.fontName}</td>
+              <td className="md:text-[14px] text-[10px]">
+                <div
+                  className="font-preview"
+                  data-font-name={font.fontName?.split("-")[0]}
+                  style={{
+                    width: "60px",
+                    height: "50px",
+                  }}
+                >
+                  {font.fontName?.split("-")[0]}
+                </div>
+              </td>
+              <td>{font?.date}</td>
               <td className="text-center">
                 <button
-                  onClick={() => uploadSelectedFont(font.id)}
-                  className={`md:w-[120px] py-1 text-center text-black rounded-md md:text-[18px] text-[12px] font-[600] ${
-                    selectedFont.some((fontData) => fontData.fontId === font.id)
+                  onClick={() => uploadSelectedFont(font._id)}
+                  className={`md:w-[120px] w-[40px]  py-1 text-center text-black rounded-md md:text-[18px] text-[8px] font-[600] ${
+                    groupDatas.some((fontData) =>
+                      fontData.fontId.includes(font._id)
+                    )
                       ? "bg-green-400 cursor-not-allowed"
                       : "bg-white cursor-pointer"
                   }`}
                 >
                   {loadSelectedFonts &&
-                  selectedFont.some((fontData) => fontData.fontId === font.id)
+                  selectedFont.some((fontData) =>
+                    fontData.fontId.includes(font._id)
+                  )
                     ? "Selected"
                     : "Select"}
                 </button>
