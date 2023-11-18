@@ -32,7 +32,7 @@ const MyContent = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const res = await axios.delete(
-          `http://localhost:5000/deleteFont/${id}`
+          `https://tech-charms-seven.vercel.app/deleteFont/${id}`
         );
         if (res.status === 200) {
           getFont();

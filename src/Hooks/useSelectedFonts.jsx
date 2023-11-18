@@ -11,7 +11,7 @@ const useSelectedFonts = () => {
 
   const selectFont = async () => {
     const res = await axios
-      .get("http://localhost:5000/getGroup")
+      .get("https://tech-charms-seven.vercel.app/getGroup")
       .then((res) => setloadSelectedFonts(res.data));
   };
 

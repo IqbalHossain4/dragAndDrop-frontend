@@ -20,7 +20,9 @@ const ListAllGroups = () => {
     getGroupData();
   }, [loadSelectedFonts]);
   const getGroupData = async () => {
-    const res = await axios.get("http://localhost:5000/getGroup");
+    const res = await axios.get(
+      "https://tech-charms-seven.vercel.app/getGroup"
+    );
     setGroupDatas(res.data);
   };
 
@@ -36,14 +38,16 @@ const ListAllGroups = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.delete(`http://localhost:5000/deleteGroup/${id}`).then((res) => {
-          if (res.status === 200) {
-            Swal.fire("Deleted!", "List are Deleted deleted.", "success");
-            selectFont();
-          } else {
-            Swal.fire("Error", "Failed to delete data.", "error");
-          }
-        });
+        axios
+          .delete(`https://tech-charms-seven.vercel.app/deleteGroup/${id}`)
+          .then((res) => {
+            if (res.status === 200) {
+              Swal.fire("Deleted!", "List are Deleted deleted.", "success");
+              selectFont();
+            } else {
+              Swal.fire("Error", "Failed to delete data.", "error");
+            }
+          });
       }
     });
   };
@@ -77,20 +81,35 @@ const ListAllGroups = () => {
         <table id="table">
           <thead>
             <tr>
-              <th>No</th>
-              <th>Group Name</th>
-              <th>Font Name</th>
-              <th>Action</th>
+              <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                No
+              </th>
+              <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                Group Name
+              </th>
+              <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                Font Name
+              </th>
+              <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
             {groupDatas.map((fontData, index) => (
               <tr key={index} className="text-[14px]">
                 <td>{index + 1}</td>
-                <td className="w-1/3">{fontData?.groupName}</td>
+                <td className="w-1/3 ">
+                  <h5 className="md:font-[600] font-[400] md:text-[15px] text-[12px]">
+                    {fontData?.groupName}
+                  </h5>
+                </td>
                 <td className="flex flex-wrap items-center">
                   {loadTotalFonts.map((font, fontIndex) => (
-                    <p key={fontIndex}>
+                    <p
+                      key={fontIndex}
+                      className="md:font-[600] font-[400] md:text-[15px] text-[12px]"
+                    >
                       {fontData.fontId.includes(font._id) &&
                         font.fontName?.split("-")[0] + ","}
                     </p>

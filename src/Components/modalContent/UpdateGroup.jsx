@@ -22,13 +22,17 @@ const UpdateGroup = ({ groupData }) => {
 
   const getGroupData = async () => {
     const res = await axios
-      .get(`http://localhost:5000/getSpecificGrp?group=${groupData}`)
+      .get(
+        `https://tech-charms-seven.vercel.app/getSpecificGrp?group=${groupData}`
+      )
       .then((res) => setGroupDatas(res.data));
   };
 
   useEffect(() => {
     const allGroup = async () => {
-      const res = await axios.get("http://localhost:5000/getGroup");
+      const res = await axios.get(
+        "https://tech-charms-seven.vercel.app/getGroup"
+      );
       setAllGroup(res.data);
     };
     allGroup();
@@ -68,7 +72,7 @@ const UpdateGroup = ({ groupData }) => {
       return;
     } else {
       const res = await axios.post(
-        `http://localhost:5000/updateGroupFont?group=${groupData}`,
+        `https://tech-charms-seven.vercel.app/updateGroupFont?group=${groupData}`,
         id
       );
       if (res.status === 200) {
@@ -98,7 +102,7 @@ const UpdateGroup = ({ groupData }) => {
     }).then((result) => {
       if (result.isConfirmed) {
         const res = axios.delete(
-          `http://localhost:5000/deleteGroupFont?id=${id}`
+          `https://tech-charms-seven.vercel.app/deleteGroupFont?id=${id}`
         );
         if (res.status === 200) {
           getFont();
@@ -183,22 +187,33 @@ const UpdateGroup = ({ groupData }) => {
       <table id="table">
         <thead>
           <tr>
-            <th>No</th>
-            <th>Font Name</th>
-            <th>Preview</th>
-            <th>Action</th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              No
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Font Name
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Preview
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Action
+            </th>
           </tr>
         </thead>
         <tbody>
           {existingFont.map((fontData, index) => (
             <tr key={index}>
               <td>{index + 1}</td>
-              <td className="w-1/3 md:text-[14px] text-[10px]">
-                {fontData.fontName}
+              <td className="w-1/3">
+                <h5 className="font-[400] md:text-[15px] text-[12px]">
+                  {" "}
+                  {fontData.fontName}
+                </h5>
               </td>
-              <td className="w-1/3 md:text-[14px] text-[10px]">
-                <div
-                  className="font-preview"
+              <td className="w-1/3">
+                <h5
+                  className="font-preview md:font-[600] font-[400] md:text-[15px] text-[12px]"
                   data-font-name={fontData.fontName?.split("-")[0]}
                   style={{
                     width: "60px",
@@ -206,7 +221,7 @@ const UpdateGroup = ({ groupData }) => {
                   }}
                 >
                   {fontData.fontName?.split("-")[0]}
-                </div>
+                </h5>
               </td>
               <td className="w-1/3">
                 <button
@@ -231,20 +246,32 @@ const UpdateGroup = ({ groupData }) => {
               <table id="table">
                 <thead>
                   <tr>
-                    <th>No</th>
-                    <th>Font Name</th>
-                    <th>Preview</th>
-                    <th>Action</th>
+                    <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                      No
+                    </th>
+                    <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                      Font Name
+                    </th>
+                    <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                      Preview
+                    </th>
+                    <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {remainingFonts.map((font, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
-                      <td className="w-1/3">{font.fontName}</td>
                       <td className="w-1/3">
-                        <div
-                          className="font-preview"
+                        <h5 className="font-[400] md:text-[15px] text-[12px]">
+                          {font.fontName}
+                        </h5>{" "}
+                      </td>
+                      <td className="w-1/3">
+                        <h5
+                          className="font-preview md:font-[600] font-[400] md:text-[15px] text-[12px]"
                           data-font-name={font.fontName?.split("-")[0]}
                           style={{
                             width: "60px",
@@ -252,7 +279,7 @@ const UpdateGroup = ({ groupData }) => {
                           }}
                         >
                           {font.fontName?.split("-")[0]}
-                        </div>
+                        </h5>
                       </td>
                       <td className="w-1/3">
                         <button

@@ -31,7 +31,7 @@ const CreateGroup = () => {
   const handlePagination = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/getFont?page=${currentPage}`
+        `https://tech-charms-seven.vercel.app/getFont?page=${currentPage}`
       );
       setPerPageFonts(res.data);
     } catch (error) {
@@ -56,7 +56,9 @@ const CreateGroup = () => {
     getGroupData();
   }, [loadSelectedFonts]);
   const getGroupData = async () => {
-    const res = await axios.get("http://localhost:5000/getGroup");
+    const res = await axios.get(
+      "https://tech-charms-seven.vercel.app/getGroup"
+    );
     setGroupDatas(res.data);
   };
 
@@ -116,7 +118,7 @@ const CreateGroup = () => {
       setInputMsg("");
       const fontData = selectedGroup;
       const res = await axios.post(
-        "http://localhost:5000/createFontGroup",
+        "https://tech-charms-seven.vercel.app/createFontGroup",
         fontData
       );
       if (res.status === 200) {
@@ -197,21 +199,33 @@ const CreateGroup = () => {
       <table id="table">
         <thead>
           <tr>
-            <th>No</th>
-            <th>Font Name</th>
-            <th>Preview</th>
-            <th>Added Time</th>
-            <th>Action</th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              No
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Font Name
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Preview
+            </th>
+
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Action
+            </th>
           </tr>
         </thead>
         <tbody>
           {perPageFonts.map((font, index) => (
             <tr key={index} className="text-[14px]">
               <td>{startSerialNumber + index}</td>
-              <td className="md:text-[14px] text-[10px]">{font.fontName}</td>
-              <td className="md:text-[14px] text-[10px]">
-                <div
-                  className="font-preview"
+              <td>
+                <h5 className="font-[400] md:text-[15px] text-[12px]">
+                  {font.fontName}
+                </h5>
+              </td>
+              <td>
+                <h5
+                  className="font-preview md:font-[600] font-[400] md:text-[15px] text-[12px]"
                   data-font-name={font.fontName?.split("-")[0]}
                   style={{
                     width: "60px",
@@ -219,9 +233,9 @@ const CreateGroup = () => {
                   }}
                 >
                   {font.fontName?.split("-")[0]}
-                </div>
+                </h5>
               </td>
-              <td>{font?.date}</td>
+
               <td className="text-center">
                 <button
                   onClick={() => uploadSelectedFont(font._id)}
@@ -262,7 +276,7 @@ const CreateGroup = () => {
               key={index}
               className={`${
                 currentPage === number ? "bg-green-500 text-black" : ""
-              } py-2 px-6 text-[18px] font-[600] text-white`}
+              } py-2 px-6 md:text-[18px] text-[15px] md:font-[600] font-[400] text-white`}
             >
               {number}
             </button>
@@ -270,7 +284,7 @@ const CreateGroup = () => {
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
-            className="text-[22px] font-[600] mx-2"
+            className="md:text-[22px] text-[15px] md:font-[600] font-[400] mx-2"
           >
             &gt;
           </button>

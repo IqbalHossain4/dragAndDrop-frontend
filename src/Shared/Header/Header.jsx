@@ -13,7 +13,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [storeSrcData, setStoreSrcData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [srcMsg, setSrcMsg] = useState("");
   const [isSticky, setIsSticky] = useState(false);
   // ==== Manage Modal ====
@@ -40,7 +40,7 @@ const Header = () => {
   const handleSearchSubmit = async (event) => {
     event.preventDefault();
     const res = await axios.get(
-      `http://localhost:5000/searchFont?font=${searchQuery}`
+      `https://tech-charms-seven.vercel.app/searchFont?font=${searchQuery}`
     );
     if (res.data.error !== "No fonts found") {
       setSrcMsg("");

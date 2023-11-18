@@ -63,7 +63,7 @@ const Home = () => {
 
           <div className=" py-2 my-24 flex items-center justify-center">
             <button
-              className="bg-[#7BFF29]  text-black text-[18px] font-[600] duration-200 hover:bg-black hover:border border-[#7BFF29] hover:text-[#7BFF29] py-3 px-4 rounded-lg "
+              className="bg-[#7BFF29]  text-black md:text-[18px] text-[12px] md:font-[600] font-[400] duration-200 hover:bg-black hover:border border-[#7BFF29] hover:text-[#7BFF29] py-3 px-4 rounded-lg  "
               onClick={openModal}
             >
               Create Group

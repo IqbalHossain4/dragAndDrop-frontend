@@ -200,6 +200,10 @@ body {
   .wrapper {
     width: 95%;
   }
+  .btn {
+    font-weight: 500;
+    padding: 5px 8px;
+  }
   .dragDropBox {
     width: 90%;
   }

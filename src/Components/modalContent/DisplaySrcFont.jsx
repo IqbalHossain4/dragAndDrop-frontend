@@ -23,7 +23,9 @@ const DisplaySrcFont = ({ srcData }) => {
     getGroupData();
   }, [loadSelectedFonts]);
   const getGroupData = async () => {
-    const res = await axios.get("http://localhost:5000/getGroup");
+    const res = await axios.get(
+      "https://tech-charms-seven.vercel.app/getGroup"
+    );
     setGroupDatas(res.data);
   };
 
@@ -83,7 +85,7 @@ const DisplaySrcFont = ({ srcData }) => {
       setInputMsg("");
       const fontData = selectedGroup;
       const res = await axios.post(
-        "http://localhost:5000/createFontGroup",
+        "https://tech-charms-seven.vercel.app/createFontGroup",
         fontData
       );
       if (res.status === 200) {
@@ -164,21 +166,35 @@ const DisplaySrcFont = ({ srcData }) => {
       <table id="table">
         <thead>
           <tr>
-            <th>No</th>
-            <th>Font Name</th>
-            <th>Preview</th>
-            <th>Added Time</th>
-            <th>Action</th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              No
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Font Name
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Preview
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Added Time
+            </th>
+            <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+              Action
+            </th>
           </tr>
         </thead>
         <tbody>
           {srcFonts.map((font, index) => (
             <tr key={index} className="text-[14px]">
               <td>{index + 1}</td>
-              <td className="md:text-[14px] text-[10px]">{font.fontName}</td>
-              <td className="md:text-[14px] text-[10px]">
-                <div
-                  className="font-preview"
+              <td>
+                <h5 className="font-[400] md:text-[15px] text-[12px]">
+                  {font.fontName}
+                </h5>
+              </td>
+              <td>
+                <h5
+                  className="font-preview md:font-[600] font-[400] md:text-[15px] text-[12px]"
                   data-font-name={font.fontName?.split("-")[0]}
                   style={{
                     width: "60px",
@@ -186,9 +202,13 @@ const DisplaySrcFont = ({ srcData }) => {
                   }}
                 >
                   {font.fontName?.split("-")[0]}
-                </div>
+                </h5>
               </td>
-              <td>{font?.date}</td>
+              <td>
+                <p className="font-[400] md:text-[15px] text-[12px]">
+                  {font?.date}
+                </p>
+              </td>
               <td className="text-center">
                 <button
                   onClick={() => uploadSelectedFont(font._id)}

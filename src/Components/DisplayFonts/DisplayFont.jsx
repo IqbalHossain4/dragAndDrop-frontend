@@ -3,9 +3,10 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import useFonts from "../../Hooks/useFonts";
 import { AiFillDelete } from "react-icons/ai";
-import WebFont from "webfontloader";
+
 const DisplayFont = () => {
   const [loadTotalFonts, getFont] = useFonts();
+  const [loadedFonts, setLoadedFonts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPageFonts, setPerPageFonts] = useState([]);
   const itemPerPage = 6;
@@ -26,7 +27,7 @@ const DisplayFont = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         const res = await axios.delete(
-          `http://localhost:5000/deleteFont/${id}`
+          `https://tech-charms-seven.vercel.app/deleteFont/${id}`
         );
         if (res.status === 200) {
           getFont();
@@ -36,7 +37,7 @@ const DisplayFont = () => {
     });
   };
 
-  // ====Manag Pagination====
+  // ====Manage Pagination====
 
   useEffect(() => {
     handlePagination();
@@ -44,7 +45,7 @@ const DisplayFont = () => {
 
   const handlePagination = async () => {
     const res = await axios.get(
-      `http://localhost:5000/getFont?page=${currentPage}`
+      `https://tech-charms-seven.vercel.app/getFont?page=${currentPage}`
     );
     setPerPageFonts(res.data);
   };
@@ -62,25 +63,44 @@ const DisplayFont = () => {
   };
 
   // ==== Font Preview ====
-  useEffect(() => {
-    const uniqueFontNames = [
-      ...new Set(perPageFonts.map((font) => font.fontName)),
-    ];
 
-    WebFont.load({
-      custom: {
-        families: uniqueFontNames.map((fontName) => fontName),
-        urls: perPageFonts.map((fonts) => fonts.font),
-      },
-      active: () => {
-        const previewElements = document.querySelectorAll(".font-preview");
-        previewElements.forEach((element) => {
-          const fontName = element.getAttribute("data-font-name");
-          element.style.fontFamily = fontName;
-        });
-      },
+  useEffect(() => {
+    loadAndApplyFonts();
+  }, [loadTotalFonts]);
+
+  // ...
+  const loadAndApplyFonts = () => {
+    const fontsToLoad = [];
+    loadTotalFonts.forEach((font, index) => {
+      const fontName = `"${font.fontName}"`;
+      const fontUrl = font.fontUrl;
+
+      if (!loadedFonts.includes(fontName)) {
+        fontsToLoad.push({ fontName, fontUrl });
+        setLoadedFonts((prevFonts) => [...prevFonts, fontName]);
+      }
     });
-  }, []);
+
+    const style = document.createElement("style");
+    let fontFaceCSS = "";
+
+    fontsToLoad.forEach((font, index) => {
+      fontFaceCSS += `
+        @font-face {
+          font-family: ${font.fontName?.split("-")[0]};
+          src: url(${font.fontUrl}) format('truetype');
+        }
+      `;
+    });
+
+    style.appendChild(document.createTextNode(fontFaceCSS));
+    document.head.appendChild(style);
+    const previewElements = document.querySelectorAll(".font-preview");
+    previewElements.forEach((element) => {
+      const fontName = element.getAttribute("data-font-name");
+      element.style.fontFamily = fontName;
+    });
+  };
 
   return (
     <div>
@@ -95,31 +115,49 @@ const DisplayFont = () => {
             <table id="table">
               <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Font Name</th>
-                  <th>Preview</th>
-                  <th>Added Time</th>
-                  <th>Action</th>
+                  <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                    No
+                  </th>
+                  <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                    Font Name
+                  </th>
+                  <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                    Preview
+                  </th>
+                  <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                    Added Time
+                  </th>
+                  <th className="md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {perPageFonts.map((font, index) => (
                   <tr key={index} className="text-[14px]">
                     <td>{startSerialNumber + index}</td>
-                    <td>{font.fontName}</td>
                     <td>
-                      <div
-                        className="font-preview"
-                        data-font-name={font.fontName}
+                      {" "}
+                      <h5 className="md:text-[15px] text-[10px]">
+                        {font.fontName}
+                      </h5>
+                    </td>
+                    <td>
+                      <h5
+                        className="font-preview md:font-[600] font-[400] md:text-[15px] text-[12px]"
+                        data-font-name={font.fontName?.split("-")[0]}
                         style={{
                           width: "60px",
                           height: "50px",
                         }}
                       >
                         {font.fontName?.split("-")[0]}
-                      </div>
+                      </h5>
                     </td>
-                    <td>{font?.date}</td>
+                    <td>
+                      {" "}
+                      <p className="md:text-[15px] text-[10px]">{font?.date}</p>
+                    </td>
                     <td>
                       <button
                         onClick={() => handleDelete(font._id)}

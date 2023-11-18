@@ -53,17 +53,21 @@ const DragAndDrop = () => {
     formData.append("email", email);
     formData.append("font", fontUrl);
     formData.append("fontName", fontName);
-    const res = await axios.post("http://localhost:5000/postFont", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadProgress(percentCompleted);
-      },
-    });
+    const res = await axios.post(
+      "https://tech-charms-seven.vercel.app/postFont",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        },
+      }
+    );
 
     if (uploadProgress == 100) {
       if (res.data.insertedId) {
@@ -95,7 +99,7 @@ const DragAndDrop = () => {
           <h2 className="text-xl font-[600] ">
             Drag & Drop your Favorite Font
           </h2>
-          <p className="mb-4 mt-2 font-[600] text-xs text-gray-400">
+          <p className="mb-4 mt-2 md:font-[600] font-[400]  md:text-xs text-[15px] text-gray-400">
             Upload Click and Drag & Drop
           </p>
           <hr className="bg-black" />
@@ -125,9 +129,9 @@ const DragAndDrop = () => {
               <p>
                 <AiOutlineCloudUpload className="w-full text-center text-[35px]" />
               </p>
-              <h3 className="text-gray-400">
-                <span className="text-white font-[600]">Click to Upload</span>{" "}
-                or drag and drop
+              <h3 className="text-gray-400 md:font-[600] font-[400]  md:text-[18px] text-[15px]">
+                <span className="text-white ">Click to Upload</span> or drag and
+                drop
               </h3>
               <p className="text-[12px] text-gray-400">Only TTF File Allowed</p>
             </div>

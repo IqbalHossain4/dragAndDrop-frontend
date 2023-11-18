@@ -5,7 +5,9 @@ const useFonts = () => {
   const { getFont, data: loadTotalFonts = [] } = useQuery({
     ueryKey: ["totalFonts"],
     queryFn: async () => {
-      const res = await axios.get("http://localhost:5000/getFonts");
+      const res = await axios.get(
+        "https://tech-charms-seven.vercel.app/getFonts"
+      );
       return res.data;
     },
   });

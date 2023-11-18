@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-
-const images = ["/src/assets/img(1).jpg", "/src/assets/img(2).jpg"];
+import imageOne from "/src/assets/img(1).jpg";
+import imageTwo from "/src/assets/img(2).jpg";
+const images = [imageOne, imageTwo];
 
 const Banner = () => {
   const [currentImage, setCurrentImage] = useState(0);
