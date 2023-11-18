@@ -205,7 +205,7 @@ const SignUp = () => {
 
                 <div className="flex flex-col items-start">
                   <label className="text-[14px] tracking-[3px]">
-                    Upload Image
+                    Upload Images
                   </label>
                   <input
                     type="file"
